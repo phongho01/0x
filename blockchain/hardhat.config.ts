@@ -2,6 +2,8 @@ require('dotenv').config();
 import { HardhatUserConfig } from "hardhat/config";
 import "@nomicfoundation/hardhat-toolbox";
 
+require('@openzeppelin/hardhat-upgrades');
+
 const config: HardhatUserConfig = {
   solidity: {
     compilers: [

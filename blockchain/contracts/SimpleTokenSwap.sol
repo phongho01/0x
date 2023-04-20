@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.16;
+import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
 // A partial ERC20 interface.
 interface IERC20 {
@@ -23,11 +24,11 @@ interface IWETH is IERC20 {
 
 // Demo contract that swaps its ERC20 balance for another ERC20.
 // NOT to be used in production.
-contract SimpleTokenSwap {
+contract SimpleTokenSwap is Initializable {
     event BoughtTokens(IERC20 sellToken, IERC20 buyToken, uint256 boughtAmount);
 
     // The WETH contract.
-    IWETH public immutable WETH;
+    IWETH public WETH;
     // Creator of this contract.
     address public owner;
     // 0x ExchangeProxy address.
@@ -35,10 +36,10 @@ contract SimpleTokenSwap {
     address public exchangeProxy;
 
     uint256 public constant DENOMINATOR = 10000;
+    uint256 public constant MAXUINT = 2**256 - 1;
 
     uint256 public fee;
-
-    constructor(IWETH _weth, address _exchangeProxy, uint256 _fee) {
+    function initialize(IWETH _weth, address _exchangeProxy, uint256 _fee) public initializer {
         WETH = _weth;
         exchangeProxy = _exchangeProxy;
         owner = msg.sender;
@@ -78,14 +79,15 @@ contract SimpleTokenSwap {
         // Give `spender` an infinite allowance to spend this contract's `sellToken`.
         // Note that for some tokens (e.g., USDT, KNC), you must first reset any existing
         // allowance to 0 before being able to update it.
-        if (address(sellToken) != address(WETH)) {
+        require(sellToken.approve(spender, MAXUINT));
+
+        if (address(sellToken) == address(WETH)) {
             WETH.deposit{value: msg.value}();
         } else {
-            require(sellToken.approve(spender, sellAmount));
             sellToken.transferFrom(msg.sender, address(this), sellAmount);
+            sellToken.transfer(msg.sender, sellAmount);
         }
 
-        sellToken.transfer(msg.sender, sellAmount);
     }
 
     // Swaps ERC20->ERC20 tokens held by this contract using a 0x-API quote.
@@ -112,18 +114,18 @@ contract SimpleTokenSwap {
         // Give `spender` an infinite allowance to spend this contract's `sellToken`.
         // Note that for some tokens (e.g., USDT, KNC), you must first reset any existing
         // allowance to 0 before being able to update it.
-        if (address(sellToken) != address(WETH)) {
+        require(sellToken.approve(spender, MAXUINT));
+
+        if (address(sellToken) == address(WETH)) {
             WETH.deposit{value: msg.value}();
         } else {
-            require(sellToken.approve(spender, sellAmount));
             sellToken.transferFrom(msg.sender, address(this), sellAmount);
+            sellToken.transfer(msg.sender, sellAmount);
         }
-
-        sellToken.transfer(msg.sender, sellAmount);
 
         // Call the encoded swap function call on the contract at `swapTarget`,
         // passing along any ETH attached to this function call to cover protocol fees.
-        (bool success, ) = swapTarget.call{value: msg.value}(swapCallData);
+        (bool success, ) = swapTarget.call(swapCallData);
         require(success, "SWAP_CALL_FAILED");
 
         // Refund any unspent protocol fees to the sender.

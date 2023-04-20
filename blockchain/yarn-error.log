@@ -1,38 +1,41 @@
 Arguments: 
-  /home/phong_ho/.nvm/versions/node/v18.12.1/bin/node /home/phong_ho/.nvm/versions/node/v18.12.1/bin/yarn deploy-goerli
+  /home/phongho/.nvm/versions/node/v18.15.0/bin/node /home/phongho/.nvm/versions/node/v18.15.0/bin/yarn upgrade-goerli
 
 PATH: 
-  /home/phong_ho/.local/bin:/home/phong_ho/.nvm/versions/node/v18.12.1/bin:/home/phong_ho/.cargo/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin:/snap/bin:/usr/local/bin/echidna-test:/.local/bin/solc:/.local/bin/slither:/.local/bin/echidna-parade
+  /home/phongho/.nvm/versions/node/v18.15.0/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin:/snap/bin
 
 Yarn version: 
   1.22.19
 
 Node version: 
-  18.12.1
+  18.15.0
 
 Platform: 
   linux x64
 
 Trace: 
-  SyntaxError: /home/phong_ho/NAPA/0x/package.json: Unexpected token \ in JSON at position 204
+  SyntaxError: /home/phongho/Personal/NAPA/0x/blockchain/package.json: Unexpected token } in JSON at position 280
       at JSON.parse (<anonymous>)
-      at /home/phong_ho/.nvm/versions/node/v18.12.1/lib/node_modules/yarn/lib/cli.js:1629:59
+      at /home/phongho/.nvm/versions/node/v18.15.0/lib/node_modules/yarn/lib/cli.js:1629:59
       at Generator.next (<anonymous>)
-      at step (/home/phong_ho/.nvm/versions/node/v18.12.1/lib/node_modules/yarn/lib/cli.js:310:30)
-      at /home/phong_ho/.nvm/versions/node/v18.12.1/lib/node_modules/yarn/lib/cli.js:321:13
+      at step (/home/phongho/.nvm/versions/node/v18.15.0/lib/node_modules/yarn/lib/cli.js:310:30)
+      at /home/phongho/.nvm/versions/node/v18.15.0/lib/node_modules/yarn/lib/cli.js:321:13
 
 npm manifest: 
   {
     "name": "hardhat-project",
     "scripts": {
       "deploy-testnet": "npx hardhat run scripts/deploy.ts --network bscTestnet",
-      "deploy-goerli": "npx hardhat run scripts/deploy.ts --network bscTestnet",\
+      "deploy-goerli": "npx hardhat run scripts/deploy.ts --network goerli",
+      "upgrade-goerli": "npx hardhat run scripts/upgrade.ts --network goerli",
     },
     "devDependencies": {
       "@nomicfoundation/hardhat-toolbox": "^2.0.2",
       "hardhat": "^2.14.0"
     },
     "dependencies": {
+      "@openzeppelin/contracts-upgradeable": "^4.8.3",
+      "@openzeppelin/hardhat-upgrades": "^1.22.1",
       "dotenv": "^16.0.3"
     }
   }
