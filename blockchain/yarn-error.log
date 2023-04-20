@@ -1,0 +1,44 @@
+Arguments: 
+  /home/phong_ho/.nvm/versions/node/v18.12.1/bin/node /home/phong_ho/.nvm/versions/node/v18.12.1/bin/yarn deploy-goerli
+
+PATH: 
+  /home/phong_ho/.local/bin:/home/phong_ho/.nvm/versions/node/v18.12.1/bin:/home/phong_ho/.cargo/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin:/snap/bin:/usr/local/bin/echidna-test:/.local/bin/solc:/.local/bin/slither:/.local/bin/echidna-parade
+
+Yarn version: 
+  1.22.19
+
+Node version: 
+  18.12.1
+
+Platform: 
+  linux x64
+
+Trace: 
+  SyntaxError: /home/phong_ho/NAPA/0x/package.json: Unexpected token \ in JSON at position 204
+      at JSON.parse (<anonymous>)
+      at /home/phong_ho/.nvm/versions/node/v18.12.1/lib/node_modules/yarn/lib/cli.js:1629:59
+      at Generator.next (<anonymous>)
+      at step (/home/phong_ho/.nvm/versions/node/v18.12.1/lib/node_modules/yarn/lib/cli.js:310:30)
+      at /home/phong_ho/.nvm/versions/node/v18.12.1/lib/node_modules/yarn/lib/cli.js:321:13
+
+npm manifest: 
+  {
+    "name": "hardhat-project",
+    "scripts": {
+      "deploy-testnet": "npx hardhat run scripts/deploy.ts --network bscTestnet",
+      "deploy-goerli": "npx hardhat run scripts/deploy.ts --network bscTestnet",\
+    },
+    "devDependencies": {
+      "@nomicfoundation/hardhat-toolbox": "^2.0.2",
+      "hardhat": "^2.14.0"
+    },
+    "dependencies": {
+      "dotenv": "^16.0.3"
+    }
+  }
+
+yarn manifest: 
+  No manifest
+
+Lockfile: 
+  No lockfile
