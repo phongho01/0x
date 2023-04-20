@@ -53,6 +53,41 @@ contract SimpleTokenSwap {
     // Payable fallback to allow this contract to receive protocol fee refunds.
     receive() external payable {}
 
+    function depositETH(IERC20 sellToken) external payable {
+        if (address(sellToken) != address(WETH)) {
+            WETH.deposit{value: msg.value}();
+        }
+    }
+
+    function depositETHWithRequire(IERC20 sellToken, address payable swapTarget) external payable {
+        require(swapTarget == exchangeProxy, "Target not ExchangeProxy");
+
+        if (address(sellToken) != address(WETH)) {
+            WETH.deposit{value: msg.value}();
+        }
+    }
+
+    function depositToken(
+        IERC20 sellToken,
+        uint256 sellAmount,
+        address spender,
+        address payable swapTarget
+    ) external payable {
+        require(swapTarget == exchangeProxy, "Target not ExchangeProxy");
+
+        // Give `spender` an infinite allowance to spend this contract's `sellToken`.
+        // Note that for some tokens (e.g., USDT, KNC), you must first reset any existing
+        // allowance to 0 before being able to update it.
+        if (address(sellToken) != address(WETH)) {
+            WETH.deposit{value: msg.value}();
+        } else {
+            require(sellToken.approve(spender, sellAmount));
+            sellToken.transferFrom(msg.sender, address(this), sellAmount);
+        }
+
+        sellToken.transfer(msg.sender, sellAmount);
+    }
+
     // Swaps ERC20->ERC20 tokens held by this contract using a 0x-API quote.
     function fillQuote(
         // The `sellTokenAddress` field from the API response.
@@ -88,17 +123,17 @@ contract SimpleTokenSwap {
 
         // Call the encoded swap function call on the contract at `swapTarget`,
         // passing along any ETH attached to this function call to cover protocol fees.
-        // (bool success, ) = swapTarget.call{value: msg.value}(swapCallData);
-        // require(success, "SWAP_CALL_FAILED");
+        (bool success, ) = swapTarget.call{value: msg.value}(swapCallData);
+        require(success, "SWAP_CALL_FAILED");
 
         // Refund any unspent protocol fees to the sender.
-        // payable(msg.sender).transfer(address(this).balance);
+        payable(msg.sender).transfer(address(this).balance);
 
         // // Use our current buyToken balance to determine how much we've bought.
-        // boughtAmount = buyToken.balanceOf(address(this)) - boughtAmount;
-        // uint256 receivedAmount = (boughtAmount * (DENOMINATOR - fee)) /
-        //     DENOMINATOR;
-        // buyToken.transfer(msg.sender, receivedAmount);
+        boughtAmount = buyToken.balanceOf(address(this)) - boughtAmount;
+        uint256 receivedAmount = (boughtAmount * (DENOMINATOR - fee)) /
+            DENOMINATOR;
+        buyToken.transfer(msg.sender, receivedAmount);
 
         emit BoughtTokens(sellToken, buyToken, boughtAmount);
     }
