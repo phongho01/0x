@@ -60,7 +60,6 @@ export default function App() {
   };
 
   const updateUNIBalance = async () => {
-    console.log('update')
     if (account.address) {
       const balance = await balanceOf(buyToken, account.address);
       setAccount({
@@ -75,6 +74,7 @@ export default function App() {
         balance: roundNumber(ethers.utils.formatUnits(balance._hex, 18)),
       });
     }
+    // setDisable({...disable, fetch: false });
   };
 
   const handleSwap = async () => {
@@ -134,7 +134,7 @@ export default function App() {
     <div className="App">
       <div className="user-info-block">
         <div className="user-info-item">
-          <button onClick={updateUNIBalance}>Refetch balance</button>
+          <button onClick={updateUNIBalance} >Refetch balance</button>
         </div>
         <div className="user-info-item">
           <a href={`${TOKEN_TRACKER_URL}${account.address}`} target='_blank' rel="noreferrer">
@@ -155,7 +155,7 @@ export default function App() {
                 </div>
                 <div className="text">
                   <span className="symbol">WETH</span>
-                  <span className="fullname">Wrap ETH</span>
+                  <span className="fullname">Wrapped ETH</span>
                 </div>
               </div>
               <div className="price">

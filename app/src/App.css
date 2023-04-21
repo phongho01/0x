@@ -1,17 +1,17 @@
 @import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;500;700&display=swap');
 
 body {
-  margin:0;
+  margin: 0;
   padding: 0;
   width: 100vw;
   height: 100vh;
   color: white;
-  display:flex;
+  display: flex;
   flex-direction: row;
   align-items: center;
   justify-content: center;
   color: #000;
-  font-family: "Open Sans";
+  font-family: 'Open Sans';
 }
 
 .App {
@@ -21,7 +21,7 @@ body {
   margin-top: 100px;
 }
 
-.converter_holder{
+.converter_holder {
   width: 886px;
   height: 96px;
   margin: 0;
@@ -32,9 +32,9 @@ body {
   align-items: center;
 }
 
-.circle{
+.circle {
   height: 58px;
-  width:58px;
+  width: 58px;
   background: #f5f7fb;
   border-radius: 50%;
   margin-left: -45px;
@@ -51,9 +51,9 @@ body {
   margin: 12px;
 }
 
-.panel{
+.panel {
   margin: 0;
-  padding :24px 24px;
+  padding: 24px 24px;
   width: 375px;
   height: 48px;
   overflow: hidden;
@@ -61,30 +61,30 @@ body {
   border-radius: 8px;
 }
 
-.panel:before{
-  content:'';
-  width:78px;
-  height:78px;
-  border-radius:50%;
-  position:absolute;
+.panel:before {
+  content: '';
+  width: 78px;
+  height: 78px;
+  border-radius: 50%;
+  position: absolute;
   background: #fff;
   top: 9px;
   z-index: -1;
 }
 
-.panel .content{
+.panel .content {
   display: flex;
   flex-direction: row;
   justify-content: space-between;
   align-items: center;
 }
 
-.panel .content .price{
+.panel .content .price {
   font-weight: 700;
   font-size: 18px;
 }
 
-.panel .content .details{
+.panel .content .details {
   display: flex;
   flex-direction: row;
   justify-content: center;
@@ -92,7 +92,7 @@ body {
   text-align: right;
 }
 
-.panel .content .details .icon{
+.panel .content .details .icon {
   display: flex;
   flex-direction: row;
   justify-content: center;
@@ -100,16 +100,16 @@ body {
   width: 48px;
   height: 48px;
   border-radius: 50%;
-  background: #EB54D2;
+  background: #eb54d2;
 }
 
-.panel .content .details .icon svg{
+.panel .content .details .icon svg {
   width: 50%;
   height: 50%;
   fill: #ffffff;
 }
 
-.panel .content .details .text{
+.panel .content .details .text {
   display: flex;
   flex-direction: column;
   margin-right: 8px;
@@ -117,57 +117,57 @@ body {
   font-weight: 500;
 }
 
-.panel .content .details .text .symbol{
+.panel .content .details .text .symbol {
   color: #7c8ca5;
   font-weight: bold;
 }
 
-.panel .content .details .text .fullname{
+.panel .content .details .text .fullname {
   color: #242637;
   font-weight: bold;
 }
 
-.panel.left{
+.panel.left {
   box-shadow: inset 0 0 0 2px #f5f7fb;
 }
 
-.panel.left:before{
+.panel.left:before {
   right: -61px;
-  box-shadow:0 0 0 2px #f5f7fb;
+  box-shadow: 0 0 0 2px #f5f7fb;
   z-index: 1;
 }
 
-.panel.left .content{
+.panel.left .content {
   flex-direction: row;
   margin-right: 10px;
 }
 
-.panel.left .content .details{
+.panel.left .content .details {
   flex-direction: row;
   text-align: left;
 }
 
-.panel.left .content .details .icon{
+.panel.left .content .details .icon {
   background: #627eea;
 }
 
-.panel.left .content .details .icon svg{
+.panel.left .content .details .icon svg {
   width: 70%;
   height: 70%;
   margin-left: 2px;
 }
 
-.panel.left .content .details .text{
+.panel.left .content .details .text {
   margin-left: 8px;
   width: 100px;
 }
 
-.panel.right:before{
+.panel.right:before {
   left: -61px;
-  box-shadow:0 0 0 1000px #f5f7fb;
+  box-shadow: 0 0 0 1000px #f5f7fb;
 }
 
-.panel.right .content{
+.panel.right .content {
   margin-left: 10px;
 }
 
@@ -235,6 +235,12 @@ body {
   font-weight: bold;
   color: #ffffff;
   border-radius: 8px;
+}
+
+.user-info-item > button:disabled {
+  border: 1px solid #999999;
+  background-color: #cccccc;
+  color: #666666;
 }
 
 .user-info-item:last-child {
