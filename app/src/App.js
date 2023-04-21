@@ -1,19 +1,35 @@
-import React, { useState, useEffect } from "react";
-import { ethers } from "ethers";
+import React, { useState, useEffect } from 'react';
+import { ethers } from 'ethers';
 import { debounce } from 'lodash';
-import { FaEthereum } from "react-icons/fa";
-import { AiOutlineArrowRight } from "react-icons/ai";
-import ABI from "./ABI.json";
-import { getQuote } from "./api";
-import "./App.css";
+import { FaEthereum } from 'react-icons/fa';
+import { AiOutlineArrowRight } from 'react-icons/ai';
+import { getSimpleSwapContract } from './utils/simpleTokenSwap';
+import { balanceOf, getContractSymbol } from './utils/erc20';
+import { getQuote } from './api';
+import './App.css';
 
-const CONTRACT_ADDRESS = "0x8b3035Bf4C2bD9923c3852D953B3222E7E849319";
-const sellToken = "0xB4FBF271143F4FBf7B91A5ded31805e42b2208d6"; // WETH
-const buyToken = "0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984"; // UNI
+const sellToken = '0xB4FBF271143F4FBf7B91A5ded31805e42b2208d6'; // WETH
+const buyToken = '0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984'; // UNI
+
+const TOKEN_TRACKER_URL = 'https://goerli.etherscan.io/token/0x1f9840a85d5af5bf1d1762f925bdaddc4201f984?a=';
 
 export default function App() {
+  const [partner, setPartner] = useState({
+    address: '',
+    balance: 0,
+  });
+  const [account, setAccount] = useState({
+    address: '',
+    balance: 0,
+  });
+  const [buyCoinSymbol, setBuyCoinSymbol] = useState('');
   const [sellAmount, setSellAmount] = useState('1');
   const [buyAmount, setBuyAmount] = useState(0);
+  const [isLoading, setIsLoading] = useState(true);
+  const [disable, setDisable] = useState({
+    fetch: false,
+    swap: false,
+  })
 
   const getOutput = async (input) => {
     try {
@@ -35,6 +51,31 @@ export default function App() {
     debouncedGetOutput(e.target.value);
   };
 
+  const formatUnits = (value) => {
+    return Math.round(ethers.utils.formatUnits(value, 18) * 100000) / 100000;
+  };
+
+  const roundNumber = (value) => {
+    return Math.round(value * 100000) / 100000;
+  };
+
+  const updateUNIBalance = async () => {
+    console.log('update')
+    if (account.address) {
+      const balance = await balanceOf(buyToken, account.address);
+      setAccount({
+        ...account,
+        balance: roundNumber(ethers.utils.formatUnits(balance._hex, 18)),
+      });
+    }
+    if (partner.address) {
+      const balance = await balanceOf(buyToken, partner.address);
+      setPartner({
+        ...partner,
+        balance: roundNumber(ethers.utils.formatUnits(balance._hex, 18)),
+      });
+    }
+  };
 
   const handleSwap = async () => {
     try {
@@ -44,45 +85,66 @@ export default function App() {
         sellAmount: ethers.utils.parseUnits(sellAmount.toString(), 18),
       });
 
-      const { sellTokenAddress, buyTokenAddress, sellAmount : parsedSellAmount, allowanceTarget, to, data: swapData } = res.data;
-      const provider = new ethers.providers.Web3Provider(window.ethereum);
-      const signer = provider.getSigner();
-
-      const contract = new ethers.Contract(CONTRACT_ADDRESS, ABI, signer);
+      const { sellTokenAddress, buyTokenAddress, sellAmount: parsedSellAmount, allowanceTarget, to, data: swapData } = res.data;
+      const contract = getSimpleSwapContract();
       await contract.fillQuote(sellTokenAddress, buyTokenAddress, parsedSellAmount, allowanceTarget, to, swapData, {
-        value: ethers.utils.parseEther(sellAmount.toString())
+        value: ethers.utils.parseEther(sellAmount.toString()),
       });
-
     } catch (error) {
       console.log(error);
     }
   };
 
-  const formatUnits = (value) => {
-    return Math.round(ethers.utils.formatUnits(value, 18) * 100000) / 100000
+  const initData = async () => {
+    setIsLoading(true);
+    const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+    const accountBalance = await balanceOf(buyToken, accounts[0]);
+    setAccount({
+      address: accounts[0],
+      balance: roundNumber(ethers.utils.formatUnits(accountBalance._hex, 18)),
+    });
 
-  }
+    const partner = await getSimpleSwapContract().partner();
+    const partnerBalance = await balanceOf(buyToken, partner);
+    setPartner({
+      address: partner,
+      balance: roundNumber(ethers.utils.formatUnits(partnerBalance._hex, 18)),
+    });
+
+    const symbol = await getContractSymbol(buyToken);
+    setBuyCoinSymbol(symbol);
+    setIsLoading(false);
+  };
 
   useEffect(() => {
-    window.ethereum
-      .request({ method: "eth_requestAccounts" })
-      .then()
-      .catch((err) => {
-        console.error(err);
-      });
+    initData();
 
-      getQuote({
-        sellToken,
-        buyToken,
-        sellAmount: ethers.utils.parseUnits(sellAmount.toString(), 18)
-      }).then(res => {
-        setBuyAmount(res.data.buyAmount);
-      });
-
+    getQuote({
+      sellToken,
+      buyToken,
+      sellAmount: ethers.utils.parseUnits(sellAmount.toString(), 18),
+    }).then((res) => {
+      setBuyAmount(res.data.buyAmount);
+    });
   }, []);
+
+  if (isLoading) return <></>;
 
   return (
     <div className="App">
+      <div className="user-info-block">
+        <div className="user-info-item">
+          <button onClick={updateUNIBalance}>Refetch balance</button>
+        </div>
+        <div className="user-info-item">
+          <a href={`${TOKEN_TRACKER_URL}${account.address}`} target='_blank' rel="noreferrer">
+            <b>You:</b> {account.balance} <b>{buyCoinSymbol}</b>
+          </a>
+          <a href={`${TOKEN_TRACKER_URL}${partner.address}`} target='_blank' rel="noreferrer">
+            <b>Partner:</b> {partner.balance} <b>{buyCoinSymbol}</b>
+          </a>
+        </div>
+      </div>
       <div className="converter_holder">
         <div className="panel left">
           <div className="content">
@@ -97,11 +159,7 @@ export default function App() {
                 </div>
               </div>
               <div className="price">
-                <input
-                  type="text"
-                  value={sellAmount}
-                  onChange={handleChangeInput}
-                />
+                <input type="text" value={sellAmount} onChange={handleChangeInput} />
               </div>
             </div>
           </div>

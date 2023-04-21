@@ -39,7 +39,7 @@ contract SimpleTokenSwap is Initializable {
     address public partner;
     uint256 public royalty;
 
-    uint256 public constant DENOMINATOR = 10000;
+    uint256 public constant DENOMINATOR = 1e4;
     uint256 public constant MAXUINT = 2**256 - 1;
 
     function initialize(IWETH _weth, address _exchangeProxy, uint256 _royalty, address _partner) public initializer {
