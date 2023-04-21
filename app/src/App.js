@@ -1,64 +1,67 @@
 import React, { useState, useEffect } from "react";
 import { ethers } from "ethers";
-import ABI from "./ABI.json";
-import "./App.css";
+import { debounce } from 'lodash';
 import { FaEthereum } from "react-icons/fa";
 import { AiOutlineArrowRight } from "react-icons/ai";
+import ABI from "./ABI.json";
 import { getQuote } from "./api";
+import "./App.css";
 
-const CONTRACT_ADDRESS = "0x711d649b1375960Fb984f9cDAa579758504E5Ec1";
-const sellToken = "0xB4FBF271143F4FBf7B91A5ded31805e42b2208d6";
-const buyToken = "0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984";
+const CONTRACT_ADDRESS = "0x8b3035Bf4C2bD9923c3852D953B3222E7E849319";
+const sellToken = "0xB4FBF271143F4FBf7B91A5ded31805e42b2208d6"; // WETH
+const buyToken = "0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984"; // UNI
 
 export default function App() {
-  const [data, setData] = useState({
-    input: 1,
-    output: 0,
-  });
+  const [sellAmount, setSellAmount] = useState('1');
+  const [buyAmount, setBuyAmount] = useState(0);
 
-  const handleChangeInput = (e) => {
-    setData({
-      ...data,
-      input: e.target.value,
-    });
-  };
-
-  const handleBeforeSwap = async () => {
+  const getOutput = async (input) => {
     try {
-      const sellAmount = ethers.utils.parseUnits(data.input.toString(), 18);
       const res = await getQuote({
         sellToken,
         buyToken,
-        sellAmount,
+        sellAmount: ethers.utils.parseUnits(input.toString(), 18),
       });
-      setData({ ...data, output: res.data.buyAmount });
+      setBuyAmount(res.data.buyAmount);
     } catch (error) {
-      console.log(error);
+      console.log('error', error);
     }
   };
+
+  const debouncedGetOutput = debounce(getOutput, 500);
+
+  const handleChangeInput = (e) => {
+    setSellAmount(e.target.value);
+    debouncedGetOutput(e.target.value);
+  };
+
 
   const handleSwap = async () => {
     try {
       const res = await getQuote({
         sellToken,
         buyToken,
-        sellAmount: ethers.utils.parseUnits(data.input.toString(), 18),
+        sellAmount: ethers.utils.parseUnits(sellAmount.toString(), 18),
       });
 
-      const { sellTokenAddress, buyTokenAddress, sellAmount, allowanceTarget, to, data: swapData } = res.data;
+      const { sellTokenAddress, buyTokenAddress, sellAmount : parsedSellAmount, allowanceTarget, to, data: swapData } = res.data;
       const provider = new ethers.providers.Web3Provider(window.ethereum);
       const signer = provider.getSigner();
 
-
       const contract = new ethers.Contract(CONTRACT_ADDRESS, ABI, signer);
-      await contract.fillQuote(sellTokenAddress, buyTokenAddress, sellAmount, allowanceTarget, to, swapData, {
-        value: ethers.utils.parseEther(data.input.toString())
+      await contract.fillQuote(sellTokenAddress, buyTokenAddress, parsedSellAmount, allowanceTarget, to, swapData, {
+        value: ethers.utils.parseEther(sellAmount.toString())
       });
 
     } catch (error) {
       console.log(error);
     }
   };
+
+  const formatUnits = (value) => {
+    return Math.round(ethers.utils.formatUnits(value, 18) * 100000) / 100000
+
+  }
 
   useEffect(() => {
     window.ethereum
@@ -68,15 +71,13 @@ export default function App() {
         console.error(err);
       });
 
-    console.log(ethers.utils.parseUnits(`0.0000000000001`, 18));
-
-    getQuote({
-      sellToken,
-      buyToken,
-      sellAmount: ethers.utils.parseUnits(data.input.toString(), 18),
-    }).then(res => {
-      setData({ ...data, output: res.data.buyAmount });
-    });
+      getQuote({
+        sellToken,
+        buyToken,
+        sellAmount: ethers.utils.parseUnits(sellAmount.toString(), 18)
+      }).then(res => {
+        setBuyAmount(res.data.buyAmount);
+      });
 
   }, []);
 
@@ -98,19 +99,19 @@ export default function App() {
               <div className="price">
                 <input
                   type="text"
-                  value={data.input}
+                  value={sellAmount}
                   onChange={handleChangeInput}
                 />
               </div>
             </div>
           </div>
         </div>
-        <div className="circle" onClick={handleBeforeSwap}>
+        <div className="circle" onClick={() => getOutput(sellAmount)}>
           <AiOutlineArrowRight size={24} />
         </div>
         <div className="panel right">
           <div className="content">
-            <div className="price">{data.output}</div>
+            <div className="price">{formatUnits(buyAmount)}</div>
             <div className="details">
               <div className="text">
                 <span className="symbol">UNI</span>

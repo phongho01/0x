@@ -4,6 +4,38 @@
     "inputs": [
       {
         "indexed": false,
+        "internalType": "uint256",
+        "name": "oldRoyalty",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "newRoyalty",
+        "type": "uint256"
+      }
+    ],
+    "name": "ChangedRoyalty",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "uint8",
+        "name": "version",
+        "type": "uint8"
+      }
+    ],
+    "name": "Initialized",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
         "internalType": "contract IERC20",
         "name": "sellToken",
         "type": "address"
@@ -21,20 +53,7 @@
         "type": "uint256"
       }
     ],
-    "name": "BoughtTokens",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": false,
-        "internalType": "uint8",
-        "name": "version",
-        "type": "uint8"
-      }
-    ],
-    "name": "Initialized",
+    "name": "Swapped",
     "type": "event"
   },
   {
@@ -62,66 +81,17 @@
   },
   {
     "inputs": [
-      {
-        "internalType": "contract IERC20",
-        "name": "sellToken",
-        "type": "address"
-      }
+      { "internalType": "uint256", "name": "_newRoyalty", "type": "uint256" }
     ],
-    "name": "depositETH",
+    "name": "changeRoyalty",
     "outputs": [],
-    "stateMutability": "payable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "contract IERC20",
-        "name": "sellToken",
-        "type": "address"
-      },
-      {
-        "internalType": "address payable",
-        "name": "swapTarget",
-        "type": "address"
-      }
-    ],
-    "name": "depositETHWithRequire",
-    "outputs": [],
-    "stateMutability": "payable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "contract IERC20",
-        "name": "sellToken",
-        "type": "address"
-      },
-      { "internalType": "uint256", "name": "sellAmount", "type": "uint256" },
-      { "internalType": "address", "name": "spender", "type": "address" },
-      {
-        "internalType": "address payable",
-        "name": "swapTarget",
-        "type": "address"
-      }
-    ],
-    "name": "depositToken",
-    "outputs": [],
-    "stateMutability": "payable",
+    "stateMutability": "nonpayable",
     "type": "function"
   },
   {
     "inputs": [],
     "name": "exchangeProxy",
     "outputs": [{ "internalType": "address", "name": "", "type": "address" }],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "fee",
-    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
     "stateMutability": "view",
     "type": "function"
   },
@@ -159,7 +129,8 @@
         "name": "_exchangeProxy",
         "type": "address"
       },
-      { "internalType": "uint256", "name": "_fee", "type": "uint256" }
+      { "internalType": "uint256", "name": "_royalty", "type": "uint256" },
+      { "internalType": "address", "name": "_partner", "type": "address" }
     ],
     "name": "initialize",
     "outputs": [],
@@ -170,6 +141,20 @@
     "inputs": [],
     "name": "owner",
     "outputs": [{ "internalType": "address", "name": "", "type": "address" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "partner",
+    "outputs": [{ "internalType": "address", "name": "", "type": "address" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "royalty",
+    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
     "stateMutability": "view",
     "type": "function"
   },

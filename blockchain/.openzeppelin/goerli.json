@@ -49,6 +49,11 @@
       "address": "0x711d649b1375960Fb984f9cDAa579758504E5Ec1",
       "txHash": "0x3da1216772391af2dab5ea5d95d3021ec8e71b048a318d5cfd2570e9a817e8f8",
       "kind": "transparent"
+    },
+    {
+      "address": "0x8b3035Bf4C2bD9923c3852D953B3222E7E849319",
+      "txHash": "0x1db360ddf0c8eb4839ba025e0445417db887739481236eb7d8fb76d575ed9809",
+      "kind": "transparent"
     }
   ],
   "impls": {
@@ -586,6 +591,94 @@
             "type": "t_uint256",
             "contract": "SimpleTokenSwap",
             "src": "contracts/SimpleTokenSwap.sol:41"
+          }
+        ],
+        "types": {
+          "t_address": {
+            "label": "address",
+            "numberOfBytes": "20"
+          },
+          "t_bool": {
+            "label": "bool",
+            "numberOfBytes": "1"
+          },
+          "t_contract(IWETH)498": {
+            "label": "contract IWETH",
+            "numberOfBytes": "20"
+          },
+          "t_uint256": {
+            "label": "uint256",
+            "numberOfBytes": "32"
+          },
+          "t_uint8": {
+            "label": "uint8",
+            "numberOfBytes": "1"
+          }
+        }
+      }
+    },
+    "7cc370e0252b92fa47123f0a2615cbeaa8363bca7591d70f997dd95fb78a532c": {
+      "address": "0x779e2cE1515CFC663aF7557C5fcE935FFdf4ED74",
+      "txHash": "0xccb8cbb6035717a655e4254b7d07cd2a4fa973b685056bf4ff6d2de913453378",
+      "layout": {
+        "solcVersion": "0.8.16",
+        "storage": [
+          {
+            "label": "_initialized",
+            "offset": 0,
+            "slot": "0",
+            "type": "t_uint8",
+            "contract": "Initializable",
+            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:62",
+            "retypedFrom": "bool"
+          },
+          {
+            "label": "_initializing",
+            "offset": 1,
+            "slot": "0",
+            "type": "t_bool",
+            "contract": "Initializable",
+            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:67"
+          },
+          {
+            "label": "WETH",
+            "offset": 2,
+            "slot": "0",
+            "type": "t_contract(IWETH)498",
+            "contract": "SimpleTokenSwap",
+            "src": "contracts/SimpleTokenSwap.sol:32"
+          },
+          {
+            "label": "owner",
+            "offset": 0,
+            "slot": "1",
+            "type": "t_address",
+            "contract": "SimpleTokenSwap",
+            "src": "contracts/SimpleTokenSwap.sol:34"
+          },
+          {
+            "label": "exchangeProxy",
+            "offset": 0,
+            "slot": "2",
+            "type": "t_address",
+            "contract": "SimpleTokenSwap",
+            "src": "contracts/SimpleTokenSwap.sol:37"
+          },
+          {
+            "label": "partner",
+            "offset": 0,
+            "slot": "3",
+            "type": "t_address",
+            "contract": "SimpleTokenSwap",
+            "src": "contracts/SimpleTokenSwap.sol:39"
+          },
+          {
+            "label": "royalty",
+            "offset": 0,
+            "slot": "4",
+            "type": "t_uint256",
+            "contract": "SimpleTokenSwap",
+            "src": "contracts/SimpleTokenSwap.sol:40"
           }
         ],
         "types": {

@@ -2,18 +2,21 @@ import { ethers, run, upgrades } from "hardhat";
 
 async function main() {
   console.log("========== DEPLOY ==========");
+  const accounts = await ethers.getSigners();
   const WETH = "0xB4FBF271143F4FBf7B91A5ded31805e42b2208d6";
   const EXCHANGE_PROXY = "0xf91bb752490473b8342a3e964e855b9f9a2a668e";
   const FEE = 500;
+  const PARTNER = accounts[0].address;
+  console.log(PARTNER);
   const SimpleTokenSwap = await ethers.getContractFactory("SimpleTokenSwap");
   const simpleTokenSwap = await upgrades.deployProxy(SimpleTokenSwap, [
     WETH,
     EXCHANGE_PROXY,
     FEE,
+    PARTNER
   ]);
   // const simpleTokenSwap = await SimpleTokenSwap.deploy(WETH, EXCHANGE_PROXY);
   await simpleTokenSwap.deployed();
-  console.log(simpleTokenSwap.address);
 
   const simpleTokenSwapImplAddress =
     await upgrades.erc1967.getImplementationAddress(simpleTokenSwap.address);

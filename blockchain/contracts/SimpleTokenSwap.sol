@@ -25,7 +25,8 @@ interface IWETH is IERC20 {
 // Demo contract that swaps its ERC20 balance for another ERC20.
 // NOT to be used in production.
 contract SimpleTokenSwap is Initializable {
-    event BoughtTokens(IERC20 sellToken, IERC20 buyToken, uint256 boughtAmount);
+    event Swapped(IERC20 sellToken, IERC20 buyToken, uint256 boughtAmount);
+    event ChangedRoyalty(uint256 oldRoyalty, uint256 newRoyalty);
 
     // The WETH contract.
     IWETH public WETH;
@@ -35,15 +36,18 @@ contract SimpleTokenSwap is Initializable {
     // See https://docs.0x.org/developer-resources/contract-addresses
     address public exchangeProxy;
 
+    address public partner;
+    uint256 public royalty;
+
     uint256 public constant DENOMINATOR = 10000;
     uint256 public constant MAXUINT = 2**256 - 1;
 
-    uint256 public fee;
-    function initialize(IWETH _weth, address _exchangeProxy, uint256 _fee) public initializer {
+    function initialize(IWETH _weth, address _exchangeProxy, uint256 _royalty, address _partner) public initializer {
         WETH = _weth;
         exchangeProxy = _exchangeProxy;
         owner = msg.sender;
-        fee = _fee;
+        royalty = _royalty;
+        partner = _partner;
     }
 
     modifier onlyOwner() {
@@ -53,42 +57,6 @@ contract SimpleTokenSwap is Initializable {
 
     // Payable fallback to allow this contract to receive protocol fee refunds.
     receive() external payable {}
-
-    function depositETH(IERC20 sellToken) external payable {
-        if (address(sellToken) != address(WETH)) {
-            WETH.deposit{value: msg.value}();
-        }
-    }
-
-    function depositETHWithRequire(IERC20 sellToken, address payable swapTarget) external payable {
-        require(swapTarget == exchangeProxy, "Target not ExchangeProxy");
-
-        if (address(sellToken) != address(WETH)) {
-            WETH.deposit{value: msg.value}();
-        }
-    }
-
-    function depositToken(
-        IERC20 sellToken,
-        uint256 sellAmount,
-        address spender,
-        address payable swapTarget
-    ) external payable {
-        require(swapTarget == exchangeProxy, "Target not ExchangeProxy");
-
-        // Give `spender` an infinite allowance to spend this contract's `sellToken`.
-        // Note that for some tokens (e.g., USDT, KNC), you must first reset any existing
-        // allowance to 0 before being able to update it.
-        require(sellToken.approve(spender, MAXUINT));
-
-        if (address(sellToken) == address(WETH)) {
-            WETH.deposit{value: msg.value}();
-        } else {
-            sellToken.transferFrom(msg.sender, address(this), sellAmount);
-            sellToken.transfer(msg.sender, sellAmount);
-        }
-
-    }
 
     // Swaps ERC20->ERC20 tokens held by this contract using a 0x-API quote.
     function fillQuote(
@@ -133,10 +101,19 @@ contract SimpleTokenSwap is Initializable {
 
         // // Use our current buyToken balance to determine how much we've bought.
         boughtAmount = buyToken.balanceOf(address(this)) - boughtAmount;
-        uint256 receivedAmount = (boughtAmount * (DENOMINATOR - fee)) /
-            DENOMINATOR;
+        uint256 royaltyFee = royalty * boughtAmount / DENOMINATOR;
+        buyToken.transfer(partner, royaltyFee);
+
+        uint256 receivedAmount = boughtAmount - royaltyFee;
         buyToken.transfer(msg.sender, receivedAmount);
 
-        emit BoughtTokens(sellToken, buyToken, boughtAmount);
+        emit Swapped(sellToken, buyToken, boughtAmount);
+    }
+
+    function changeRoyalty(uint256 _newRoyalty) external onlyOwner {
+        uint256 oldRoyalty = royalty;
+        royalty = _newRoyalty;
+        
+        emit ChangedRoyalty(oldRoyalty, _newRoyalty);
     }
 }
