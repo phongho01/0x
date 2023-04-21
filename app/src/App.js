@@ -7,6 +7,7 @@ import { getSimpleSwapContract } from './utils/simpleTokenSwap';
 import { balanceOf, getContractSymbol } from './utils/erc20';
 import { getQuote } from './api';
 import './App.css';
+import UNITOETH from './components/UNITOETH';
 
 const sellToken = '0xB4FBF271143F4FBf7B91A5ded31805e42b2208d6'; // WETH
 const buyToken = '0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984'; // UNI
@@ -27,10 +28,6 @@ export default function App() {
   const [sellAmount, setSellAmount] = useState('1');
   const [buyAmount, setBuyAmount] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
-  const [disable, setDisable] = useState({
-    fetch: false,
-    swap: false,
-  });
 
   const getOutput = async (input) => {
     try {
@@ -150,7 +147,7 @@ export default function App() {
         <div className="panel left">
           <div className="content">
             <div className="details">
-              <a href={`${GOERLI_EXPLORER_URL}${sellToken}`} className="detail-wrap" target='_blank' rel="noreferrer">
+              <a href={`${GOERLI_EXPLORER_URL}${sellToken}`} className="detail-wrap" target="_blank" rel="noreferrer">
                 <div className="icon">
                   <FaEthereum />
                 </div>
@@ -172,7 +169,7 @@ export default function App() {
           <div className="content">
             <div className="price">{formatUnits(buyAmount)}</div>
             <div className="details">
-              <a href={`${GOERLI_EXPLORER_URL}${buyToken}`} className="detail-wrap" target='_blank' rel="noreferrer" >
+              <a href={`${GOERLI_EXPLORER_URL}${buyToken}`} className="detail-wrap" target="_blank" rel="noreferrer">
                 <div className="text">
                   <span className="symbol">UNI</span>
                   <span className="fullname">UNISWAP</span>
@@ -186,10 +183,12 @@ export default function App() {
             </div>
           </div>
         </div>
+        <button className="btn-swap" onClick={handleSwap}>
+          SWAP
+        </button>
       </div>
-      <button className="btn-swap" onClick={handleSwap}>
-        SWAP
-      </button>
+      <UNITOETH account={account.address} />
+      
     </div>
   );
 }

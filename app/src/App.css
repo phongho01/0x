@@ -22,7 +22,7 @@ body {
 }
 
 .converter_holder {
-  width: 886px;
+  width: 1000px;
   height: 96px;
   margin: 0;
   padding: 0;
@@ -30,6 +30,7 @@ body {
   flex-direction: row;
   justify-content: space-between;
   align-items: center;
+  margin-bottom: 20px;
 }
 
 .circle {
@@ -190,8 +191,7 @@ body {
 }
 
 .btn-swap {
-  width: 300px;
-  margin-top: 80px;
+  width: 80px;
   height: 50px;
   cursor: pointer;
   font-size: 16px;
@@ -209,7 +209,7 @@ body {
 
 .user-info-block {
   margin-bottom: 20px;
-  width: 886px;
+  width: 1000px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -246,4 +246,12 @@ body {
 
 .user-info-item:last-child {
   text-align: right;
+}
+
+.panel.left.second .content .details .icon {
+  background-color: #eb54d2 !important;
+}
+
+.panel.right.second .content .details .icon {
+  background-color: #627eea;
 }
