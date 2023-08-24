@@ -1,12 +1,12 @@
-import React, { useState, useEffect } from 'react';
 import { ethers } from 'ethers';
 import { debounce } from 'lodash';
-import { FaEthereum } from 'react-icons/fa';
+import React, { useEffect, useState } from 'react';
 import { AiOutlineArrowRight } from 'react-icons/ai';
-import { getSimpleSwapContract } from './utils/simpleTokenSwap';
-import { balanceOf, getContractSymbol } from './utils/erc20';
-import { getQuote } from './api';
+import { FaEthereum } from 'react-icons/fa';
 import './App.css';
+import { getQuote } from './api';
+import { balanceOf, getContractSymbol } from './utils/erc20';
+import { getSimpleSwapContract } from './utils/simpleTokenSwap';
 
 const sellToken = '0xB4FBF271143F4FBf7B91A5ded31805e42b2208d6'; // WETH
 const buyToken = '0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984'; // UNI
@@ -32,6 +32,32 @@ export default function App() {
     swap: false,
   });
 
+  const requireSwitchNetwork = async () => {
+    try {
+      await window.ethereum.request({
+        method: 'wallet_switchEthereumChain',
+        params: [{ chainId: '0x5' }],
+      });
+    } catch (error) {
+      if (error.code === 4902) {
+        try {
+          await window.ethereum.request({
+            method: 'wallet_addEthereumChain',
+            params: [
+              {
+                chainId: '0x5',
+                rpcUrl: 'https://mainnet.infura.io/v3/',
+              },
+            ],
+          });
+        } catch (addError) {
+          console.error(addError);
+        }
+      }
+      console.error(error);
+    }
+  };
+
   const getOutput = async (input) => {
     try {
       const res = await getQuote({
@@ -44,6 +70,11 @@ export default function App() {
       console.log('error', error);
     }
   };
+
+  const getProvider = () => {
+    const provider = new ethers.providers.Web3Provider(window.ethereum);
+    return provider;
+  }
 
   const debouncedGetOutput = debounce(getOutput, 500);
 
@@ -80,17 +111,22 @@ export default function App() {
 
   const handleSwap = async () => {
     try {
-      const res = await getQuote({
-        sellToken,
-        buyToken,
-        sellAmount: ethers.utils.parseUnits(sellAmount.toString(), 18),
-      });
+      const network = await getProvider()._networkPromise;
+      if (network.chainId === 5) {
+        const res = await getQuote({
+          sellToken,
+          buyToken,
+          sellAmount: ethers.utils.parseUnits(sellAmount.toString(), 18),
+        });
 
-      const { sellTokenAddress, buyTokenAddress, sellAmount: parsedSellAmount, allowanceTarget, to, data: swapData } = res.data;
-      const contract = getSimpleSwapContract();
-      await contract.fillQuote(sellTokenAddress, buyTokenAddress, parsedSellAmount, allowanceTarget, to, swapData, {
-        value: ethers.utils.parseEther(sellAmount.toString()),
-      });
+        const { sellTokenAddress, buyTokenAddress, sellAmount: parsedSellAmount, allowanceTarget, to, data: swapData } = res.data;
+        const contract = getSimpleSwapContract();
+        await contract.fillQuote(sellTokenAddress, buyTokenAddress, parsedSellAmount, allowanceTarget, to, swapData, {
+          value: ethers.utils.parseEther(sellAmount.toString()),
+        });
+      } else {
+        requireSwitchNetwork();
+      }
     } catch (error) {
       console.log(error);
     }
@@ -98,35 +134,45 @@ export default function App() {
 
   const initData = async () => {
     setIsLoading(true);
-    const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-    const accountBalance = await balanceOf(buyToken, accounts[0]);
-    setAccount({
-      address: accounts[0],
-      balance: roundNumber(ethers.utils.formatUnits(accountBalance._hex, 18)),
-    });
+    const network = await getProvider()._networkPromise;
 
-    const partner = await getSimpleSwapContract().partner();
-    const partnerBalance = await balanceOf(buyToken, partner);
-    setPartner({
-      address: partner,
-      balance: roundNumber(ethers.utils.formatUnits(partnerBalance._hex, 18)),
-    });
+    if (network.chainId === 5) {
+      const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+      const accountBalance = await balanceOf(buyToken, accounts[0]);
+      setAccount({
+        address: accounts[0],
+        balance: roundNumber(ethers.utils.formatUnits(accountBalance._hex, 18)),
+      });
 
-    const symbol = await getContractSymbol(buyToken);
-    setBuyCoinSymbol(symbol);
+      const partner = await getSimpleSwapContract().partner();
+      const partnerBalance = await balanceOf(buyToken, partner);
+      setPartner({
+        address: partner,
+        balance: roundNumber(ethers.utils.formatUnits(partnerBalance._hex, 18)),
+      });
+
+      const symbol = await getContractSymbol(buyToken);
+      setBuyCoinSymbol(symbol);
+    }
+
     setIsLoading(false);
   };
 
   useEffect(() => {
-    initData();
+    if (window.ethereum) {
+      requireSwitchNetwork();
+      initData();
 
-    getQuote({
-      sellToken,
-      buyToken,
-      sellAmount: ethers.utils.parseUnits(sellAmount.toString(), 18),
-    }).then((res) => {
-      setBuyAmount(res.data.buyAmount);
-    });
+      getQuote({
+        sellToken,
+        buyToken,
+        sellAmount: ethers.utils.parseUnits(sellAmount.toString(), 18),
+      }).then((res) => {
+        setBuyAmount(res.data.buyAmount);
+      });
+    } else {
+      alert('MetaMask is not installed. Please consider installing it: https://metamask.io/download.html');
+    }
   }, []);
 
   if (isLoading) return <></>;
